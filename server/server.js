@@ -1,3 +1,4 @@
+
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -457,7 +458,8 @@ app.post('/api/auth/register-with-children', async (req, res) => {
 
     // Создаем студентов
     const students = [];
-    for (const child of children) {
+    const safeChildren = Array.isArray(children) ? children : [];
+    for (const child of safeChildren) {
       const studentLogin = `${child.username.toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
       const studentPassword = Math.random().toString(36).slice(2, 10);
 

@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -47,7 +48,7 @@ const userSchema = new mongoose.Schema({
   taskProgress: { type: Object, default: {} }
 });
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', function(next) {
   if (this.isModified('email') && this.email) {
     this.email = this.email.toLowerCase().trim();
   }
@@ -55,9 +56,15 @@ userSchema.pre('save', async function(next) {
     this.login = this.login.toLowerCase().trim();
   }
   if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+
+  bcrypt.genSalt(10).then(salt => {
+    return bcrypt.hash(this.password, salt);
+  }).then(hash => {
+    this.password = hash;
+    next();
+  }).catch(err => {
+    next(err);
+  });
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword) {
